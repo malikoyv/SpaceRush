@@ -289,37 +289,43 @@ function gameLoop() {
         
         requestAnimationFrame(gameLoop);
     } else {
-        drawBackground();
-        ctx.font = '40px Arial';
-        ctx.fillStyle = 'red';
-        ctx.textAlign = 'center';
-        ctx.fillText('Game Over!', canvas.width / 2, 300);
-        ctx.font = '20px Arial';
-        ctx.fillText('Score: ' + score, canvas.width / 2, 350);
-        
-        // Add a "Play Again" button
-        ctx.fillStyle = 'white';
-        ctx.fillRect(canvas.width / 2 - 60, 400, 120, 40);
-        ctx.fillStyle = 'black';
-        ctx.font = '20px Arial';
-        ctx.fillText('Play Again', canvas.width / 2, 425);
-        
-        // Add click event listener for the "Play Again" button
-        canvas.addEventListener('click', handlePlayAgainClick);
+        showDeadPage();
     }
 }
 
-function handlePlayAgainClick(event) {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+function showDeadPage() {
+    const deadPageIframe = document.createElement('iframe');
+    deadPageIframe.id = 'deadPage';
+    deadPageIframe.src = 'DeadPage/deadPage.html';
+    deadPageIframe.style.position = 'absolute';
+    deadPageIframe.style.top = '0';
+    deadPageIframe.style.left = '0';
+    deadPageIframe.style.width = '100%';
+    deadPageIframe.style.height = '100%';
+    deadPageIframe.style.border = 'none';
+    document.getElementById('game-container').appendChild(deadPageIframe);
     
-    if (x >= canvas.width / 2 - 60 && x <= canvas.width / 2 + 60 &&
-        y >= 400 && y <= 440) {
-        canvas.removeEventListener('click', handlePlayAgainClick);
-        startGame();
-    }
+    // Send the score to the dead page
+    setTimeout(() => {
+        deadPageIframe.contentWindow.postMessage({ type: 'setScore', score: score }, '*');
+    }, 100);
 }
+
+// Add this function to restart the game
+function restartGame() {
+    const deadPageIframe = document.getElementById('deadPage');
+    if (deadPageIframe) {
+        deadPageIframe.remove();
+    }
+    startGame();
+}
+
+// Add this event listener to handle messages from the dead page
+window.addEventListener('message', function(event) {
+    if (event.data === 'restartGame') {
+        restartGame();
+    }
+});
 
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
