@@ -71,7 +71,6 @@
         window.parent.postMessage('restartGame', '*');
     }
 
-    // Add this event listener to receive the score from the main game
     window.addEventListener('message', function(event) {
         if (event.data.type === 'setScore') {
             score = event.data.score;

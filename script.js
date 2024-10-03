@@ -39,6 +39,12 @@ let minObstacleInterval = 800; // Smallere interval før 20 point
 let canSpawnImprovedObstacle = false;
 let canSpawnBlackObstacle = false;
 
+const backgroundMusic = new Audio('assets/background.mp3');
+backgroundMusic.loop = true;
+let isMusicPlaying = false;
+
+const hitSound = new Audio('assets/hit.mp3');
+
 function drawBall() {
     ctx.drawImage(ball.image, ball.x - ball.width / 2, ball.y - ball.height / 2, ball.width, ball.height);
 }
@@ -60,6 +66,14 @@ function startGame() {
     ball.x = lanes[0];
     ball.y = 550;
     ball.lane = 0;
+    
+    // Reset and start background music
+    backgroundMusic.currentTime = 0; // Reset to the beginning
+    backgroundMusic.play().then(() => {
+        isMusicPlaying = true;
+    }).catch(error => {
+        console.error("Error playing background music:", error);
+    });
     
     // Start the game loop
     gameLoop();
@@ -113,7 +127,7 @@ function checkSpeedIncrease() {
         canSpawnBlackObstacle = true;
     }
 }
-
+і
 function spawnImprovedObstacle() {
     // Find den modsatte bane af den seneste normale forhindring
     const lastNormalObstacle = obstacles.find(obs => obs.color !== 'purple' && obs.color !== 'black');
@@ -239,6 +253,7 @@ function checkCollision() {
         
         if (collision) {
             gameOver = true;
+            hitSound.play();
         }
     });
 }
@@ -294,6 +309,10 @@ function gameLoop() {
 }
 
 function showDeadPage() {
+    // Pause the background music
+    backgroundMusic.pause();
+    isMusicPlaying = false;
+
     const deadPageIframe = document.createElement('iframe');
     deadPageIframe.id = 'deadPage';
     deadPageIframe.src = 'DeadPage/deadPage.html';
@@ -317,6 +336,7 @@ function restartGame() {
     if (deadPageIframe) {
         deadPageIframe.remove();
     }
+    document.getElementById('gameCanvas').style.display = 'block';
     startGame();
 }
 
@@ -324,14 +344,26 @@ function restartGame() {
 window.addEventListener('message', function(event) {
     if (event.data === 'restartGame') {
         restartGame();
+    } else if (event.data === 'startGame') {
+        startGame();
     }
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
+    if (e.code === 'Space' && !gameOver) {
+        e.preventDefault(); // Prevent default space bar behavior (e.g., scrolling)
         switchLane();
     }
 });
 
 // Remove or comment out this line at the end of the file
 // window.startGame = startGame;
+
+// Add this function at the end of the file to initialize the game
+function init() {
+    canvas.style.display = 'block';
+    startGame();
+}
+
+// Call init() when the window loads
+window.onload = init;
