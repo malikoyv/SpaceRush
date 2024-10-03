@@ -1,3 +1,9 @@
+window.addEventListener('message', function(event) {
+    if (event.data === 'startGame') {
+        startGame();
+    }
+});
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -39,6 +45,24 @@ function drawBall() {
 
 function drawBackground() {
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+}
+
+function startGame() {
+    document.getElementById('startPage').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    
+    // Reset game state
+    score = 0;
+    speed = 5;
+    speedIncrease = 0;
+    obstacles = [];
+    gameOver = false;
+    ball.x = lanes[0];
+    ball.y = 550;
+    ball.lane = 0;
+    
+    // Start the game loop
+    gameLoop();
 }
 
 function drawObstacles() {
@@ -272,6 +296,28 @@ function gameLoop() {
         ctx.fillText('Game Over!', canvas.width / 2, 300);
         ctx.font = '20px Arial';
         ctx.fillText('Score: ' + score, canvas.width / 2, 350);
+        
+        // Add a "Play Again" button
+        ctx.fillStyle = 'white';
+        ctx.fillRect(canvas.width / 2 - 60, 400, 120, 40);
+        ctx.fillStyle = 'black';
+        ctx.font = '20px Arial';
+        ctx.fillText('Play Again', canvas.width / 2, 425);
+        
+        // Add click event listener for the "Play Again" button
+        canvas.addEventListener('click', handlePlayAgainClick);
+    }
+}
+
+function handlePlayAgainClick(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    if (x >= canvas.width / 2 - 60 && x <= canvas.width / 2 + 60 &&
+        y >= 400 && y <= 440) {
+        canvas.removeEventListener('click', handlePlayAgainClick);
+        startGame();
     }
 }
 
@@ -281,6 +327,5 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-backgroundImage.onload = function() {
-    gameLoop();
-};
+// Remove or comment out this line at the end of the file
+// window.startGame = startGame;

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceRush - Start Page</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('StartingPage.webp');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: black; /* Add a background color to fill any gaps */
+        }
+        .start-button {
+            position: absolute;
+            left: 50%;
+            bottom: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            width: 200px;
+            height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <button class="start-button" onclick="startGame()"></button>
+    <script src="startingPage.js"></script>
+</body>
+</html>
