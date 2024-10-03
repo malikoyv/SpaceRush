@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpaceRush - Game Over</title>
+    <title>SpaceRush</title>
     <style>
         body {
             margin: 0;
@@ -46,31 +46,31 @@
             color: black;
             box-shadow: 0 0 25px cyan, 0 0 50px cyan;
         }
-        #score-display {
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 50px;
-            color: white;
-            text-shadow: 0 0 10px red, 0 0 20px red;
-        }
     </style>
 </head>
 <body>
 <div id="game-container">
-    <div id="score-display">Score: 0</div>
+    <div id="score-display" style="
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 50px;
+        color: white;
+        text-shadow: 0 0 10px red, 0 0 20px red;
+    ">
+        Score: 0
+    </div>
     <img id="startPage" src="YouAreDead.webp" alt="SpaceRush">
     <button class="restart-button" onclick="restartGame()">Restart</button>
 </div>
 
 <script>
-    let score = 0;
-
     function restartGame() {
         window.parent.postMessage('restartGame', '*');
     }
 
+    // Add this event listener to receive the score from the main game
     window.addEventListener('message', function(event) {
         if (event.data.type === 'setScore') {
             score = event.data.score;

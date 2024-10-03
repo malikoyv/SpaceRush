@@ -336,8 +336,28 @@ function restartGame() {
     if (deadPageIframe) {
         deadPageIframe.remove();
     }
-    document.getElementById('gameCanvas').style.display = 'block';
-    startGame();
+    // Reset game state
+    gameOver = false;
+    obstacles = [];
+    score = 0;
+    speed = 5;
+    speedIncrease = 0;
+    showSpeedIncreaseMessage = false;
+    speedIncreaseMessageTimer = 0;
+    ball.x = lanes[0];
+    ball.y = 550;
+    ball.lane = 0;
+    
+    // Restart background music
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play().then(() => {
+        isMusicPlaying = true;
+    }).catch(error => {
+        console.error("Error playing background music:", error);
+    });
+    
+    // Restart the game loop
+    gameLoop();
 }
 
 // Add this event listener to handle messages from the dead page
