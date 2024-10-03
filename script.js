@@ -39,12 +39,6 @@ let minObstacleInterval = 800; // Smallere interval før 20 point
 let canSpawnImprovedObstacle = false;
 let canSpawnBlackObstacle = false;
 
-const backgroundMusic = new Audio('assets/background.mp3');
-backgroundMusic.loop = true;
-let isMusicPlaying = false;
-
-const hitSound = new Audio('assets/hit.mp3');
-
 function drawBall() {
     ctx.drawImage(ball.image, ball.x - ball.width / 2, ball.y - ball.height / 2, ball.width, ball.height);
 }
@@ -67,13 +61,9 @@ function startGame() {
     ball.y = 550;
     ball.lane = 0;
     
-    // Reset and start background music
-    backgroundMusic.currentTime = 0; // Reset to the beginning
-    backgroundMusic.play().then(() => {
-        isMusicPlaying = true;
-    }).catch(error => {
-        console.error("Error playing background music:", error);
-    });
+    // Start background music
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play().catch(error => console.error("Error playing background music:", error));
     
     // Start the game loop
     gameLoop();
@@ -127,7 +117,7 @@ function checkSpeedIncrease() {
         canSpawnBlackObstacle = true;
     }
 }
-і
+
 function spawnImprovedObstacle() {
     // Find den modsatte bane af den seneste normale forhindring
     const lastNormalObstacle = obstacles.find(obs => obs.color !== 'purple' && obs.color !== 'black');
@@ -253,7 +243,10 @@ function checkCollision() {
         
         if (collision) {
             gameOver = true;
-            hitSound.play();
+            console.log('Collision detected, playing sound');
+            hitSound.play().catch(error => console.error("Error playing hit sound:", error));
+            backgroundMusic.pause();
+            backgroundMusic.currentTime = 0;
         }
     });
 }
@@ -271,14 +264,14 @@ function drawScore() {
     ctx.font = '20px Arial';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'left';
-    ctx.fillText('Score: ' + score, 10, 30);
+    ctx.fillText('Wynik: ' + score, 10, 30);
 }
 
 function drawSpeedIncrease() {
     ctx.font = 'bold 24px Arial';
     ctx.fillStyle = 'blue';
     ctx.textAlign = 'right';
-    ctx.fillText(`+${speedIncrease}% speed`, canvas.width - 10, 30);
+    ctx.fillText(`+${speedIncrease}% prędkość`, canvas.width - 10, 30);
 }
 
 function gameLoop() {
@@ -309,10 +302,6 @@ function gameLoop() {
 }
 
 function showDeadPage() {
-    // Pause the background music
-    backgroundMusic.pause();
-    isMusicPlaying = false;
-
     const deadPageIframe = document.createElement('iframe');
     deadPageIframe.id = 'deadPage';
     deadPageIframe.src = 'DeadPage/deadPage.html';
@@ -336,42 +325,19 @@ function restartGame() {
     if (deadPageIframe) {
         deadPageIframe.remove();
     }
-    // Reset game state
-    gameOver = false;
-    obstacles = [];
-    score = 0;
-    speed = 5;
-    speedIncrease = 0;
-    showSpeedIncreaseMessage = false;
-    speedIncreaseMessageTimer = 0;
-    ball.x = lanes[0];
-    ball.y = 550;
-    ball.lane = 0;
-    
-    // Restart background music
-    backgroundMusic.currentTime = 0;
-    backgroundMusic.play().then(() => {
-        isMusicPlaying = true;
-    }).catch(error => {
-        console.error("Error playing background music:", error);
-    });
-    
-    // Restart the game loop
-    gameLoop();
+    backgroundMusic.play().catch(error => console.error("Error playing background music:", error));
+    startGame();
 }
 
 // Add this event listener to handle messages from the dead page
 window.addEventListener('message', function(event) {
     if (event.data === 'restartGame') {
         restartGame();
-    } else if (event.data === 'startGame') {
-        startGame();
     }
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !gameOver) {
-        e.preventDefault(); // Prevent default space bar behavior (e.g., scrolling)
+    if (e.code === 'Space') {
         switchLane();
     }
 });
@@ -379,11 +345,30 @@ document.addEventListener('keydown', (e) => {
 // Remove or comment out this line at the end of the file
 // window.startGame = startGame;
 
-// Add this function at the end of the file to initialize the game
-function init() {
-    canvas.style.display = 'block';
-    startGame();
+function createBeepSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // 440 Hz = A4 note
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+
+        console.log('Beep sound played successfully');
+    } catch (error) {
+        console.error('Error playing beep sound:', error);
+    }
 }
 
-// Call init() when the window loads
-window.onload = init;
+const backgroundMusic = new Audio('assets/background.mp3');
+backgroundMusic.loop = true;
+const hitSound = new Audio('assets/hit.mp3');   
